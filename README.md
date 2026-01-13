@@ -1,20 +1,21 @@
 # OG Crawler Server
 
-동적 + 정적 크롤링으로 OG 메타데이터를 수집하는 Express 서버입니다. Vercel 배포를 기본으로 설계했습니다.
+An Express server that collects Open Graph (OG) metadata using both static and dynamic crawling.
+Designed primarily for deployment on Vercel.
 
 ## Features
-- 정적 크롤링 (fetch + cheerio)
-- 동적 크롤링 (Playwright + serverless Chromium)
-- 자동 폴백 (정적 결과가 빈약하면 동적 크롤링으로 전환)
-- OG 데이터: title, description, url, site_name, image, favicon
-- CORS 허용: `http://localhost:5173`, `https://untitled-rho.vercel.app`
+- Static crawling (fetch + cheerio)
+- Dynamic crawling (Playwright + serverless Chromium)
+- Automatic fallback (switches to dynamic crawling if static results are insufficient)
+- OG data extraction: `title, description, url, site_name, image, favicon`
+- CORS enabled: http://localhost:5173, https://untitled-rho.vercel.app
 
 ## API
-- `GET /api/health`
-- `GET /api/crawl?url=<target>&mode=auto|static|dynamic`
+- GET `/api/health`
+- GET `/api/crawl?url=<target>&mode=auto|static|dynamic`
 
-응답 예시:
-```json
+## Response Example
+```
 {
   "ok": true,
   "mode": "dynamic",
@@ -30,27 +31,24 @@
   }
 }
 ```
-
-## Local Run
-```bash
+## Local Development
+```
 npm install
 npm run dev
 ```
 
-### Playwright Local 설정
-Vercel 환경에서는 `@sparticuz/chromium` 바이너리를 사용합니다. 로컬에서 동적 크롤링을 쓰려면 아래 중 하나를 설정하세요.
+## Playwright Setup (Local)
+In the Vercel environment, the server uses the @sparticuz/chromium binary.
+To enable dynamic crawling locally, choose one of the following options:
 
-1) Playwright Chromium 경로 지정
-```bash
-export PLAYWRIGHT_CHROMIUM_PATH="/path/to/chrome-or-chromium"
+1) Specify a Chromium executable path
+`export PLAYWRIGHT_CHROMIUM_PATH="/path/to/chrome-or-chromium"`
+
+2) Install Playwright locally (optional)
 ```
-
-2) 로컬에 Playwright 설치 후 브라우저 설치 (선택)
-```bash
 npm i -D playwright
 npx playwright install chromium
 ```
 
-## Vercel 배포
-`vercel.json`이 Express 엔드포인트를 `/api/*`로 리라이트합니다.
-
+## Deployment on Vercel
+The vercel.json file rewrites Express endpoints to `/api/*`
