@@ -1,6 +1,7 @@
 const allowedOrigins = new Set([
   'http://localhost:5173',
-  'https://untitled-rho.vercel.app'
+  'https://untitled-rho.vercel.app',
+  "https://re-zero-theta.vercel.app/"
 ]);
 
 export const corsOptions = {
