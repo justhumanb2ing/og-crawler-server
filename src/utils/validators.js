@@ -33,3 +33,21 @@ export const parseCrawlMode = (value) => {
 
   return mode;
 };
+
+export const parseIncludeTimings = (value) => {
+  if (value === undefined) {
+    return false;
+  }
+
+  const normalized = String(value).toLowerCase();
+
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) {
+    return true;
+  }
+
+  if (['0', 'false', 'no', 'off'].includes(normalized)) {
+    return false;
+  }
+
+  throw badRequest('Invalid timings parameter');
+};

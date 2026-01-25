@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { corsOptions } from './config/cors.js';
 import healthRouter from './routes/health.js';
+import metricsRouter from './routes/metrics.js';
 import crawlRouter from './routes/crawl.js';
 import { HttpError } from './utils/errors.js';
 
@@ -16,12 +17,18 @@ app.get('/', (req, res) => {
     ok: true,
     message: 'OG crawler server is running',
     endpoints: {
-      health: '/api/health',
+      health: '/health',
+      helath: '/helath',
+      metrics: '/metrics',
+      api_health: '/api/health',
       crawl: '/api/crawl?url=...&mode=auto'
     }
   });
 });
 
+app.use('/health', healthRouter);
+app.use('/helath', healthRouter);
+app.use('/metrics', metricsRouter);
 app.use('/api/health', healthRouter);
 app.use('/api/crawl', crawlRouter);
 
