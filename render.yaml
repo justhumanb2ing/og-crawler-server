@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: og-crawler-server
+    env: node
+    plan: free
+    buildCommand: bun install && bunx playwright install chromium
+    startCommand: PLAYWRIGHT_CHROMIUM_PATH=$(bun -e "import { chromium } from 'playwright-core'; console.log(chromium.executablePath());") bun run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      - key: DYNAMIC_BROWSER_REUSE
+        value: "true"
