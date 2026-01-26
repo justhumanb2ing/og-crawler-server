@@ -3,8 +3,8 @@ services:
     name: og-crawler-server
     env: node
     plan: free
-    buildCommand: bun install && bunx playwright install chromium
-    startCommand: PLAYWRIGHT_CHROMIUM_PATH=$(bun -e "import { chromium } from 'playwright-core'; console.log(chromium.executablePath());") bun run start
+    buildCommand: curl -fsSL https://bun.sh/install | bash && export PATH="$HOME/.bun/bin:$PATH" && bun install && bunx playwright install chromium
+    startCommand: export PATH="$HOME/.bun/bin:$PATH" && PLAYWRIGHT_CHROMIUM_PATH=$(bun -e "import { chromium } from 'playwright-core'; console.log(chromium.executablePath());") bun run start
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
