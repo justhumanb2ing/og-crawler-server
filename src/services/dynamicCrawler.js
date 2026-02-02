@@ -65,12 +65,29 @@ const getBrowserMaxUses = () => {
 };
 
 const getNetworkIdleTimeoutMs = () => {
-  const timeoutMs = Number(process.env.DYNAMIC_NETWORKIDLE_TIMEOUT_MS);
+  const raw = process.env.DYNAMIC_NETWORKIDLE_TIMEOUT_MS;
+  if (raw === undefined) {
+    return isServerless ? 0 : DEFAULT_NETWORKIDLE_TIMEOUT_MS;
+  }
+
+  const timeoutMs = Number(raw);
   if (Number.isNaN(timeoutMs)) {
-    return DEFAULT_NETWORKIDLE_TIMEOUT_MS;
+    return isServerless ? 0 : DEFAULT_NETWORKIDLE_TIMEOUT_MS;
   }
 
   return Math.max(timeoutMs, 0);
+};
+
+const getBlockedResourceTypes = () => {
+  const raw = process.env.DYNAMIC_BLOCK_RESOURCE_TYPES;
+  if (!raw) {
+    return isServerless ? ['image', 'media', 'font', 'stylesheet'] : [];
+  }
+
+  return raw
+    .split(',')
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
 };
 
 const getLaunchOptions = async () => {
@@ -81,7 +98,7 @@ const getLaunchOptions = async () => {
   return {
     args: isServerless ? serverlessChromium.args : [],
     executablePath: executablePath || undefined,
-    headless: isServerless ? serverlessChromium.headless : true
+    headless: true
   };
 };
 
@@ -265,6 +282,16 @@ export const crawlDynamic = async (targetUrl, options = {}) => {
 
     page = await context.newPage();
     page.setDefaultTimeout(DEFAULT_TIMEOUT_MS);
+    const blockedTypes = getBlockedResourceTypes();
+    if (blockedTypes.length > 0) {
+      await page.route('**/*', (route) => {
+        const resourceType = route.request().resourceType();
+        if (blockedTypes.includes(resourceType)) {
+          return route.abort();
+        }
+        return route.continue();
+      });
+    }
 
     const navigationStartedAt = Date.now();
     await page.goto(targetUrl, {

@@ -13,10 +13,14 @@
   },
   "dependencies": {
     "@sparticuz/chromium": "^123.0.1",
+    "@vendia/serverless-express": "^4.12.6",
     "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "playwright-core": "^1.46.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.2"
   }
 }

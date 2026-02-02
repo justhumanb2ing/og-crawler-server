@@ -18,18 +18,14 @@ app.get('/', (req, res) => {
     message: 'OG crawler server is running',
     endpoints: {
       health: '/health',
-      helath: '/helath',
       metrics: '/metrics',
-      api_health: '/api/health',
       crawl: '/api/crawl?url=...&mode=auto'
     }
   });
 });
 
 app.use('/health', healthRouter);
-app.use('/helath', healthRouter);
 app.use('/metrics', metricsRouter);
-app.use('/api/health', healthRouter);
 app.use('/api/crawl', crawlRouter);
 
 app.use((req, res) => {

@@ -52,3 +52,35 @@ npx playwright install chromium
 
 ## Deployment on Vercel
 The vercel.json file rewrites Express endpoints to `/api/*`
+
+## AWS Lambda (Function URL)
+For the fastest response path, use a Lambda Function URL with the HTTP API v2 event
+format and the dedicated handler below.
+
+### Entry
+Use `src/lambda.js` as the handler entry point.
+
+### Deploy with AWS SAM
+1) Install dependencies
+```
+bun install
+```
+
+2) Build + deploy
+```
+sam build --use-container
+sam deploy --guided
+```
+
+After deploy, call:
+`<FunctionURL>/api/crawl?url=https://example.com&mode=auto`
+
+### Performance-oriented defaults (recommended)
+- `DYNAMIC_NETWORKIDLE_TIMEOUT_MS=0` (skip network idle wait)
+- `DYNAMIC_BROWSER_REUSE=true`
+- `DYNAMIC_BROWSER_TTL_MS=120000`
+- `DYNAMIC_BROWSER_MAX_USES=50`
+- `DYNAMIC_BLOCK_RESOURCE_TYPES=image,media,font,stylesheet`
+
+### Notes
+- Function URL base path is `/`, so call `/api/crawl` as-is.

@@ -39,5 +39,6 @@ extractOgData -> return
 - `DYNAMIC_BROWSER_REUSE`: 브라우저 재사용 여부 (기본값: 서버리스=false, 그 외=true)
 - `DYNAMIC_BROWSER_TTL_MS`: 재사용 브라우저 TTL (기본값: 120000)
 - `DYNAMIC_BROWSER_MAX_USES`: 브라우저 최대 사용 횟수 (기본값: 50)
-- `DYNAMIC_NETWORKIDLE_TIMEOUT_MS`: networkidle 대기 ms (0이면 대기 생략, 기본값: 1500)
+- `DYNAMIC_NETWORKIDLE_TIMEOUT_MS`: networkidle 대기 ms (0이면 대기 생략, 기본값: 1500, 서버리스 기본=0)
+- `DYNAMIC_BLOCK_RESOURCE_TYPES`: 차단할 리소스 타입 (예: `image,media,font,stylesheet`)
 ```

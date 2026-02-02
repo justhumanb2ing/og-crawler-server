@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: OG Crawler Server (AWS Lambda Function URL)
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    MemorySize: 2048
+    Timeout: 20
+    Architectures:
+      - x86_64
+    EphemeralStorage:
+      Size: 1024
+    Environment:
+      Variables:
+        NODE_OPTIONS: --enable-source-maps
+        DYNAMIC_BROWSER_REUSE: 'true'
+        DYNAMIC_BROWSER_TTL_MS: '120000'
+        DYNAMIC_BROWSER_MAX_USES: '50'
+        DYNAMIC_NETWORKIDLE_TIMEOUT_MS: '0'
+        DYNAMIC_BLOCK_RESOURCE_TYPES: 'image,media,font,stylesheet'
+
+Resources:
+  OgCrawlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: src/lambda.handler
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowOrigins:
+            - '*'
+          AllowMethods:
+            - GET
+          AllowHeaders:
+            - '*'
+    Metadata:
+      BuildMethod: makefile
+
+Outputs:
+  FunctionArn:
+    Description: Lambda Function ARN
+    Value: !GetAtt OgCrawlerFunction.Arn
