@@ -7,7 +7,7 @@ Extractor는 HTML에서 OG/Twitter/기본 메타 정보를 Cheerio로 파싱합�
 - `og:title`, `twitter:title`, `<title>` 순으로 title 결정
 - `og:description`, `description`, `twitter:description` 순으로 description 결정
 - `og:image` 계열 및 twitter image 처리
-- favicon link rel 탐색 후 없으면 `/favicon.ico` fallback
+- favicon link rel 탐색 시 `apple-touch-icon`을 최우선으로 선택하고, 없으면 `/favicon.ico` fallback
 
 ## 시퀀스 다이어그램(Extraction)
 
@@ -17,7 +17,7 @@ cheerio.load(html)
   |  pickFirstContent(og:title, twitter:title, title)
   |  pickFirstContent(og:description, description, twitter:description)
   |  pickFirstContent(og:image*, twitter:image)
-  |  pickFirstHref(favicon rel variants)
+  |  pickFirstHref(favicon rel variants, apple-touch-icon first)
   v
 resolveUrl(baseUrl, candidate) -> normalized result
 ```

@@ -49,10 +49,10 @@ export const extractOgData = (html, baseUrl) => {
   ]);
 
   const faviconHref = pickFirstHref($, [
-    'link[rel="icon"]',
-    'link[rel="shortcut icon"]',
     'link[rel="apple-touch-icon"]',
     'link[rel="apple-touch-icon-precomposed"]',
+    'link[rel="icon"]',
+    'link[rel="shortcut icon"]',
     'link[rel~="icon"]'
   ]);
 
