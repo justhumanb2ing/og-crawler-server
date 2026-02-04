@@ -12,15 +12,145 @@ const pickFirstContent = ($, selectors) => {
   return null;
 };
 
-const pickFirstHref = ($, selectors) => {
-  for (const selector of selectors) {
-    const value = $(selector).attr('href');
-    if (value) {
-      return value.trim();
+const parseSizes = (sizes) => {
+  if (!sizes) {
+    return null;
+  }
+
+  const normalized = sizes.trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+
+  if (normalized === 'any') {
+    return { any: true, max: Number.POSITIVE_INFINITY };
+  }
+
+  let maxSize = 0;
+  for (const token of normalized.split(/\s+/)) {
+    const match = token.match(/^(\d{1,4})x(\d{1,4})$/);
+    if (!match) {
+      continue;
+    }
+
+    const width = Number(match[1]);
+    const height = Number(match[2]);
+    const candidate = Math.max(width, height);
+    if (Number.isFinite(candidate)) {
+      maxSize = Math.max(maxSize, candidate);
     }
   }
 
-  return null;
+  return maxSize ? { any: false, max: maxSize } : null;
+};
+
+const inferSizeFromHref = (href) => {
+  if (!href) {
+    return 0;
+  }
+
+  let maxSize = 0;
+  const sizePairs = href.matchAll(/(\d{2,4})x(\d{2,4})/gi);
+  for (const match of sizePairs) {
+    const width = Number(match[1]);
+    const height = Number(match[2]);
+    const candidate = Math.max(width, height);
+    if (Number.isFinite(candidate)) {
+      maxSize = Math.max(maxSize, candidate);
+    }
+  }
+
+  if (maxSize) {
+    return maxSize;
+  }
+
+  const sizeSingles = href.matchAll(/(\d{2,4})/g);
+  for (const match of sizeSingles) {
+    const candidate = Number(match[1]);
+    if (Number.isFinite(candidate)) {
+      maxSize = Math.max(maxSize, candidate);
+    }
+  }
+
+  return maxSize;
+};
+
+const getRelPriority = (relTokens) => {
+  if (relTokens.includes('apple-touch-icon')) {
+    return 4;
+  }
+  if (relTokens.includes('apple-touch-icon-precomposed')) {
+    return 3;
+  }
+  if (relTokens.includes('icon')) {
+    return 2;
+  }
+  if (relTokens.includes('shortcut')) {
+    return 1;
+  }
+
+  return 0;
+};
+
+const isIconRel = (relTokens) =>
+  relTokens.includes('icon') ||
+  relTokens.includes('apple-touch-icon') ||
+  relTokens.includes('apple-touch-icon-precomposed') ||
+  relTokens.includes('shortcut');
+
+const pickBestIconHref = ($) => {
+  const candidates = [];
+
+  $('link[rel]').each((_, element) => {
+    const relRaw = ($(element).attr('rel') || '').toLowerCase();
+    const relTokens = relRaw.split(/\s+/).filter(Boolean);
+    if (!isIconRel(relTokens)) {
+      return;
+    }
+
+    const href = $(element).attr('href');
+    if (!href) {
+      return;
+    }
+
+    const sizesInfo = parseSizes($(element).attr('sizes'));
+    const inferredSize = sizesInfo?.max || inferSizeFromHref(href);
+    const type = ($(element).attr('type') || '').toLowerCase();
+    const isSvg =
+      type === 'image/svg+xml' || href.toLowerCase().endsWith('.svg');
+
+    const sizeScore = sizesInfo?.any
+      ? Number.POSITIVE_INFINITY
+      : inferredSize;
+
+    candidates.push({
+      href: href.trim(),
+      sizeScore,
+      relPriority: getRelPriority(relTokens),
+      isSvg
+    });
+  });
+
+  if (!candidates.length) {
+    return null;
+  }
+
+  candidates.sort((a, b) => {
+    const svgScoreA = a.isSvg ? Number.POSITIVE_INFINITY : a.sizeScore;
+    const svgScoreB = b.isSvg ? Number.POSITIVE_INFINITY : b.sizeScore;
+
+    if (svgScoreA !== svgScoreB) {
+      return svgScoreB - svgScoreA;
+    }
+
+    if (a.relPriority !== b.relPriority) {
+      return b.relPriority - a.relPriority;
+    }
+
+    return 0;
+  });
+
+  return candidates[0].href;
 };
 
 export const extractOgData = (html, baseUrl) => {
@@ -48,13 +178,7 @@ export const extractOgData = (html, baseUrl) => {
     'meta[name="twitter:image"]'
   ]);
 
-  const faviconHref = pickFirstHref($, [
-    'link[rel="apple-touch-icon"]',
-    'link[rel="apple-touch-icon-precomposed"]',
-    'link[rel="icon"]',
-    'link[rel="shortcut icon"]',
-    'link[rel~="icon"]'
-  ]);
+  const faviconHref = pickBestIconHref($);
 
   const finalUrl = rawUrl ? resolveUrl(resolvedBaseUrl, rawUrl) : resolvedBaseUrl;
   const hostname = resolvedBaseUrl ? new URL(resolvedBaseUrl).hostname : null;

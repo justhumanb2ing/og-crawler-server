@@ -35,13 +35,7 @@ export const extractOgData = (html, baseUrl) => {
     'meta[name="twitter:image"]'
   ]);
 
-  const faviconHref = pickFirstHref($, [
-    'link[rel="apple-touch-icon"]',
-    'link[rel="apple-touch-icon-precomposed"]',
-    'link[rel="icon"]',
-    'link[rel="shortcut icon"]',
-    'link[rel~="icon"]'
-  ]);
+  const faviconHref = pickBestIconHref($);
 
   const finalUrl = rawUrl ? resolveUrl(resolvedBaseUrl, rawUrl) : resolvedBaseUrl;
   const hostname = resolvedBaseUrl ? new URL(resolvedBaseUrl).hostname : null;
@@ -84,7 +78,7 @@ extractOgData(html, baseUrl)
   |  pickFirstContent for og:title / twitter:title / <title>
   |  pickFirstContent for og:description / description / twitter:description
   |  pickFirstContent for og:image / og:image:secure_url / twitter:image
-  |  pickFirstHref for various favicon rel values
+  |  pickBestIconHref (size-aware selection for favicon links)
   |  resolveUrl(baseUrl, relativeCandidate)
   v
 return normalized OG payload
